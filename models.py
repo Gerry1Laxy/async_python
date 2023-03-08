@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, JSON
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.future import select
 
 
 PG_DSN = 'postgresql+asyncpg://postgres:1@localhost:5432/async_netology'
@@ -21,7 +22,12 @@ class SwapiPeople(Base):
     json = Column(JSON)
 
 
+async def main():
+    async with Session() as session:
+        selected = select(SwapiPeople)
+        result = await session.execute(selected)
+        for people in result.scalars():
+            print(people.id)
+
 if __name__ == '__main__':
-    with Session() as session:
-        for item in session.query(SwapiPeople).all():
-            print(item)
+    asyncio.run(main())
