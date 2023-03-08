@@ -24,10 +24,10 @@ class SwapiPeople(Base):
 
 async def main():
     async with Session() as session:
-        selected = select(SwapiPeople)
+        selected = select(SwapiPeople).where(SwapiPeople.id >= 440)
         result = await session.execute(selected)
         for people in result.scalars():
-            print(people.id)
+            print(people.json)
 
 if __name__ == '__main__':
     asyncio.run(main())
