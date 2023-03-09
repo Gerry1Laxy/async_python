@@ -22,15 +22,15 @@ deleted_filds = (
     'url'
 )
 
-hash_req = dict()
+cashe_req = dict()
 
 async def get_item(
         ses: Session, people_id: int = None, subqueries: str = None
     ):
     if subqueries:
-        chek_hash = hash_req.get(subqueries)
-        if chek_hash:
-            return chek_hash
+        chek_cashe = cashe_req.get(subqueries)
+        if chek_cashe:
+            return chek_cashe
         url = subqueries
     else:
         url = f'https://swapi.dev/api/people/{people_id}'
@@ -41,7 +41,7 @@ async def get_item(
             await rewrite_fields(ses, response_json)
             await delete_fields(response_json)
         else:
-            hash_req[subqueries] = response_json
+            cashe_req[subqueries] = response_json
         return response_json
 
 async def rewrite_fields(ses: Session, people):
