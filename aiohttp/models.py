@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, func
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, relationship
@@ -52,3 +52,14 @@ class Token(Base):
     user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
     user = relationship('User', backref='token', lazy='joined')
     creation_time = Column(DateTime, server_default=func.now())
+
+class Advertisement(Base):
+
+    __tablename__ = 'advertisment'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, unique=True, index=True, nullable=False)
+    description = Column(Text)
+    creation_time = Column(DateTime, server_default=func.now())
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    owner = relationship('User', backref='adv')

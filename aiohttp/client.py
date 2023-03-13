@@ -67,6 +67,83 @@ async def main():
             }
         )
         print(response.status)
+        user_response = await response.json()
+        print(user_response)
+        
+        response = await session.patch(
+            'http://localhost:8080/users/2',
+            json={
+                'name': 'user_2',
+                # 'password': '43210',
+            },
+            headers={'token': user_response['token']}
+        )
+        print(response.status)
+        print(await response.json())
+        response = await session.get(
+            'http://localhost:8080/users/2',
+        )
+        print(response.status)
+        print(await response.json())
+        # response = await session.delete(
+        #     'http://localhost:8080/users/2',
+        #     headers={'token': user_response['token']}
+        # )
+        # print(response.status)
+        # print(await response.json())
+        # response = await session.get(
+        #     'http://localhost:8080/users/2',
+        # )
+        # print(response.status)
+        # print(await response.json())
+        response = await session.post(
+            'http://localhost:8080/users/2/adv/',
+            json={
+                'title': 'adv_1',
+                'description': 'some description'
+            },
+            headers={
+                'token': user_response['token']
+            }
+        )
+        print(response.status)
+        print(await response.json())
+        response = await session.get(
+            'http://localhost:8080/users/2/adv/1',
+        )
+        print(response.status)
+        print(await response.json())
+
+        response = await session.patch(
+            'http://localhost:8080/users/2/adv/1',
+            json={
+                'title': 'adv_6',
+                'description': 'description'
+            },
+            headers={
+                'token': user_response['token']
+            }
+        )
+        print(response.status)
+        print(await response.json())
+        response = await session.get(
+            'http://localhost:8080/users/2/adv/1',
+        )
+        print(response.status)
+        print(await response.json())
+
+        response = await session.delete(
+            'http://localhost:8080/users/2/adv/1',
+            headers={
+                'token': user_response['token']
+            }
+        )
+        print(response.status)
+        print(await response.json())
+        response = await session.get(
+            'http://localhost:8080/users/2/adv/1',
+        )
+        print(response.status)
         print(await response.json())
 
 

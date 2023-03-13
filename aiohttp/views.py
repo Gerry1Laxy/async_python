@@ -4,7 +4,7 @@ from aiohttp import web
 from sqlalchemy import select
 from bcrypt import hashpw, gensalt, checkpw
 
-from models import User
+from models import User, Advertisement
 
 
 def raise_http_error(error_class, message: str):
@@ -27,6 +27,29 @@ class BaseView(web.View):
     async def get(self):
         item = await self.get_item()
     
+    async def patch(self):
+        self.check_owner()
+        item = await self.get_item()
+        json_data = await self.request.json()
+        if 'password' in json_data:
+            await self.hash_password(json_data)
+        for field, value in json_data.items():
+            setattr(item, field, value)
+        self.request.session.add(item)
+        await self.request.session.commit()
+        return web.json_response({
+            'status': 'success'
+        })
+
+    async def delete(self):
+        self.check_owner()
+        await self.request.session.delete(await self.get_item())
+        await self.request.session.commit()
+        return web.json_response({
+            'status': 'success'
+        })
+
+    
     async def get_item(self):
         item = await self.request.session.get(self.model, self.item_id)
         if item is None:
@@ -34,19 +57,24 @@ class BaseView(web.View):
                 web.HTTPNotFound,
                 f'{self.model.__name__} not found'
             )
+        return item
+    
+    def check_owner(self):
+        if not self.request['token'] or (
+            self.request['token'].user_id != self.user_id
+        ):
+            raise_http_error(web.HTTPForbidden, 'only owner has access')
 
 
 
-class UserView(web.View):
+class UserView(BaseView):
 
     def __init__(self, request: web.Request) -> None:
         super().__init__(request)
-        self.user_id = int(self.request.match_info.get('user_id', 0))
+        self.model = User
 
     async def get(self):
-        session = self.request.session
-        # user_id = int(self.request.match_info['user_id'])
-        user = await self.get_user()
+        user = await self.get_item()
         return web.json_response({
             'id': user.id,
             'name': user.name,
@@ -77,47 +105,6 @@ class UserView(web.View):
             'id': user.id
         })
 
-    async def patch(self):
-        self.check_owner()
-        user = await self.get_user()
-        json_data = await self.request.json()
-        if 'password' in json_data:
-            await self.hash_password(json_data)
-        for field, value in json_data.items():
-            setattr(user, field, value)
-        self.request.session.add(user)
-        await self.request.session.commit()
-        return web.json_response({
-            'status': 'success'
-        })
-
-    async def delete(self):
-        self.check_owner()
-        await self.request.session.delete(await self.get_user())
-        await self.request.session.commit()
-        return web.json_response({
-            'status': 'success'
-        })
-
-    async def get_user(self):
-        user = await self.request.session.get(User, self.user_id)
-
-        if user is None:
-            raise web.HTTPNotFound(
-                text=json.dumps({
-                    'status': 'error',
-                    'massege': 'user not found'
-                }),
-                content_type='application/json'
-            )
-        return user
-    
-    def check_owner(self):
-        if not self.request['token'] or (
-            self.request['token'].user_id != self.user_id
-        ):
-            raise_http_error(web.HTTPForbidden, 'only owner has access')
-    
     async def hash_password(self, json_data):
         password = json_data['password']
         password = password.encode()
@@ -125,3 +112,37 @@ class UserView(web.View):
         password = password.decode()
         json_data['password'] = password
 
+
+class AdvView(BaseView):
+
+    def __init__(self, request: web.Request) -> None:
+        super().__init__(request)
+        self.item_id = int(self.request.match_info.get('adv_id', 0))
+        self.model = Advertisement
+
+    async def get(self):
+        adv = await self.get_item()
+        return web.json_response({
+            'id': adv.id,
+            'title': adv.title,
+            'description': adv.description,
+            'creation_time': adv.creation_time.isoformat()
+        })
+
+    async def post(self):
+        session = self.request.session
+        json_data = await self.request.json()
+        item = await session.execute(
+            select(self.model).where(self.model.title == json_data['title'])
+        )
+        if item.scalars().first() is None:
+            adv = self.model(user_id=self.user_id, **json_data)
+            session.add(adv)
+            await session.commit()
+        else:
+            raise_http_error(web.HTTPConflict, 'advertisement already exists')
+
+        print(adv.id, adv.user_id)
+        return web.json_response({
+            'id': adv.id
+        })

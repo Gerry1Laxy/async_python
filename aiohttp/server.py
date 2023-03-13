@@ -3,24 +3,8 @@ from sqlalchemy import select
 from bcrypt import checkpw
 
 from models import orm_context, session_middleware, User, Token
-from views import raise_http_error, UserView
+from views import raise_http_error, UserView, AdvView
 
-
-# async def test(request: web.Request):
-
-#     json_data = await request.json()
-#     headers = request.headers
-#     qs = request.query
-#     print(json_data)
-#     if json_data:
-#         print(f'{json_data=}')
-#     print(f'{headers=}')
-#     print(f'{qs=}')
-#     return web.json_response(
-#         {
-#             'hello': 'world'
-#         }
-#     )
 
 def check_password(password: str, hashed_password: str):
     return checkpw(password.encode(), hashed_password.encode())
@@ -66,13 +50,18 @@ if __name__ == '__main__':
     app.middlewares.append(session_middleware)
     app.add_routes([
         web.post('/users/', UserView),
-        web.post('/login', login)
+        web.post('/login', login),
+        web.get('/users/{user_id:\d+}', UserView),
+        web.get('/users/{user_id:\d+}/adv/{adv_id:\d+}', AdvView)
     ])
     app_auth_required.add_routes([
-        web.get('/{user_id:\d+}', UserView),
         web.patch('/{user_id:\d+}', UserView),
         web.delete('/{user_id:\d+}', UserView),
+        web.patch('/{user_id:\d+}/adv/{adv_id:\d+}', AdvView),
+        web.delete('/{user_id:\d+}/adv/{adv_id:\d+}', AdvView),
+        web.post('/{user_id:\d+}/adv/', AdvView)
     ])
+
     app.add_subapp('/users', app_auth_required)
 
     web.run_app(app, host='localhost')
