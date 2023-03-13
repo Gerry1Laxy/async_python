@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+import uuid
+
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 from aiohttp.web import middleware, Request
 
@@ -29,7 +32,7 @@ async def orm_context(app):
 async def session_middleware(requests: Request, handler):
     
     async with Session() as session:
-        requests['session'] = session
+        requests.session = session
         return await handler(requests)
 
 class User(Base):
@@ -41,3 +44,11 @@ class User(Base):
     password = Column(String, nullable=False)
     creation_time = Column(DateTime, server_default=func.now())
 
+class Token(Base):
+
+    __tablename__ = 'token'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'))
+    user = relationship('User', backref='token', lazy='joined')
+    creation_time = Column(DateTime, server_default=func.now())

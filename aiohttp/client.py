@@ -15,6 +15,15 @@ async def main():
         )
         print(response.status)
         print(await response.json())
+        response = await session.post(
+            'http://localhost:8080/users/',
+            json={
+                'name': 'user_3',
+                'password': '4321',
+            }
+        )
+        print(response.status)
+        print(await response.json())
         response = await session.patch(
             'http://localhost:8080/users/1',
             json={
@@ -29,13 +38,33 @@ async def main():
         )
         print(response.status)
         print(await response.json())
-        response = await session.delete(
-            'http://localhost:8080/users/1',
+        # response = await session.delete(
+        #     'http://localhost:8080/users/1',
+        # )
+        # print(response.status)
+        # print(await response.json())
+        # response = await session.get(
+        #     'http://localhost:8080/users/1',
+        # )
+        # print(response.status)
+        # print(await response.json())
+        print('login\n' + '-' * 20)
+        response = await session.post(
+            'http://localhost:8080/login',
+            json={
+                'name': 'user_2',
+                'password': '4321'
+            }
         )
         print(response.status)
         print(await response.json())
-        response = await session.get(
-            'http://localhost:8080/users/1',
+        print('login\n' + '-' * 20)
+        response = await session.post(
+            'http://localhost:8080/login',
+            json={
+                'name': 'user_3',
+                'password': '4321'
+            }
         )
         print(response.status)
         print(await response.json())
