@@ -9,6 +9,7 @@ from views import raise_http_error, UserView, AdvView
 def check_password(password: str, hashed_password: str):
     return checkpw(password.encode(), hashed_password.encode())
 
+
 @web.middleware
 async def auth_middleware(request: web.Request, handler):
     token_id = request.headers.get('token')
@@ -64,5 +65,4 @@ async def get_app():
 
     app.add_subapp('/users', app_auth_required)
 
-    # web.run_app(app, host='localhost')
     return app

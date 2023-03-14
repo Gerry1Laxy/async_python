@@ -6,13 +6,14 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
+from config import PG_DSN
 from aiohttp.web import middleware, Request
 
 
-PG_DSN = 'postgresql+asyncpg://app:secret@db:5432/app'
-
 engine = create_async_engine(PG_DSN)
-Session = sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
+Session = sessionmaker(
+    bind=engine, expire_on_commit=False, class_=AsyncSession
+)
 Base = declarative_base()
 
 async def orm_context(app):

@@ -49,7 +49,6 @@ class BaseView(web.View):
             'status': 'success'
         })
 
-    
     async def get_item(self):
         item = await self.request.session.get(self.model, self.item_id)
         if item is None:

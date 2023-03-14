@@ -7,20 +7,20 @@ services:
     ports:
       - "5431:5432"
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: app
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DB}
 
-    # networks:
-    #   dev_network:
-    #     aliases:
-    #       - postgre
   app:
 
     build:
       context: .
-    # environment:
-    #   PG_USER: ${PG_USER}
+    environment:
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_HOST: ${PG_HOST}
+      PG_PORT: ${PG_PORT}
+      PG_DB: ${PG_DB}
     ports:
       - 8080:8080
     depends_on:
