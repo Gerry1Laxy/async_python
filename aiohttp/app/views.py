@@ -142,7 +142,6 @@ class AdvView(BaseView):
         else:
             raise_http_error(web.HTTPConflict, 'advertisement already exists')
 
-        print(adv.id, adv.user_id)
         return web.json_response({
             'id': adv.id
         })
