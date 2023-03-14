@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from aiohttp.web import middleware, Request
 
 
-PG_DSN = 'postgresql+asyncpg://postgres:1@localhost:5432/hw_aiohttp'
+PG_DSN = 'postgresql+asyncpg://app:secret@db:5432/app'
 
 engine = create_async_engine(PG_DSN)
 Session = sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
